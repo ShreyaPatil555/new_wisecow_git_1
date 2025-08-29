@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirement.txt
 
 # Copy application code
 COPY . .
@@ -15,3 +15,4 @@ EXPOSE 4499
 
 # Run the app
 CMD ["python", "app.py"]
+
