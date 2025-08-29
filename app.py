@@ -1,10 +1,11 @@
+nano app.py
 from flask import Flask
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/")
 def home():
-    return "🚀 Hello from Wisecow Flask App running in Docker!"
+    return "Hello from Wisecow Flask App!"
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
