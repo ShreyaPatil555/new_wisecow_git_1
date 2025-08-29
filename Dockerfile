@@ -4,7 +4,7 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
+COPY requirement.txt .
 RUN pip install --no-cache-dir -r requirement.txt
 
 # Copy application code
@@ -15,4 +15,5 @@ EXPOSE 4499
 
 # Run the app
 CMD ["python", "app.py"]
+
 
