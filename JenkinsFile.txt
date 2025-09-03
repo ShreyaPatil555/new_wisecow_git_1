@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCOUNT_ID = "741957640939"
+        AWS_REGION     = "ap-south-1"
+        ECR_REPO       = "wisecow"
+        IMAGE_TAG      = "latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-user/wisecow.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+            }
+        }
+
+        stage('Scan Image with Trivy') {
+            steps {
+                sh 'trivy image $ECR_REPO:$IMAGE_TAG || true'
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com'
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                sh '''
+                docker tag $ECR_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                sh '''
+                aws ecs update-service \
+                  --cluster wisecow-cluster \
+                  --service wisecow-service \
+                  --force-new-deployment \
+                  --region $AWS_REGION
+                '''
+            }
+        }
+    }
+}
