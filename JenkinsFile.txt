@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_ACCOUNT_ID = "741957640939"
         AWS_REGION     = "ap-south-1"
-        ECR_REPO       = "wisecow"
+        ECR_REPO       = "wisecow-app"
         IMAGE_TAG      = "latest"
     }
 
@@ -23,13 +23,17 @@ pipeline {
 
         stage('Scan Image with Trivy') {
             steps {
+                // Trivy scans for vulnerabilities but won’t fail the pipeline
                 sh 'trivy image $ECR_REPO:$IMAGE_TAG || true'
             }
         }
 
         stage('Login to ECR') {
             steps {
-                sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com'
+                sh '''
+                aws ecr get-login-password --region $AWS_REGION | \
+                docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                '''
             }
         }
 
@@ -55,3 +59,4 @@ pipeline {
         }
     }
 }
+
